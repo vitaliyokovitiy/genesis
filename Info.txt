@@ -1,0 +1,58 @@
+1. Устанавливаем Ansible
+apt install ansible
+
+2. Настраиваем файл host, прописываем данные серверов и логин/пароль подключения. Так же указываем, что будет выполняться через python3
+[docker]
+192.168.0.172
+
+[docker:vars]
+ansible_ssh_user=username
+ansible_ssh_pass=userpass
+ansible_python_interpreter=/usr/bin/python3
+
+Так же необходимо установить sshpass
+apt install sshpass
+
+Устанавливаем python3
+sudo apt install python3-pip
+
+После установки можем проверить подключение
+ansible all -m ping
+
+Если все настроено корректно, получаем ответ:
+192.168.0.172 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+
+3. Устанавливаем Docker
+
+Устанавливаем доп.компоненты для установки Docker
+apt install docker-ce -y
+
+Запускаем и добавляем в автозагрузку
+systemctl start docker
+systemctl enable docker
+
+Пользователя с помощью которого выполняется подключение добавляем в группу docker
+usermod -aG docker username
+
+Создаем файл с скриптом - deploy-docker (вложение 1)
+
+Запускам наш скрипт с помощью Ansible и указываем, чтобы был применен к docker
+ansible-playbook deploy-docker -l docker
+
+Проверяем запущенные контейнеры
+docker ps
+
+Если все успешно выполнено, видим 2 запущенных контейнера:
+CONTAINER ID   IMAGE       COMMAND                  CREATED         STATUS         PORTS                NAMES
+08f8b71f5941   wordpress   "docker-entrypoint.s…"   6 minutes ago   Up 6 minutes   0.0.0.0:80->80/tcp   wordpres                  s
+1f4bd182589a   mariadb     "docker-entrypoint.s…"   7 minutes ago   Up 7 minutes   3306/tcp             mariadb
+
+
+
+
+
+
+
